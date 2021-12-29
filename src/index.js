@@ -231,7 +231,6 @@ export default class CanvasDraw extends PureComponent {
     }
 
     const { lines, width, height } = JSON.parse(saveData);
-    console.log(lines)
 
     if (!lines || typeof lines.push !== "function") {
       throw new Error("saveData.lines needs to be an array!");
@@ -243,7 +242,6 @@ export default class CanvasDraw extends PureComponent {
       width === this.props.canvasWidth &&
       height === this.props.canvasHeight
     ) {
-      console.log('same', width)
       this.simulateDrawingLines({
         lines,
         immediate,
