@@ -90,6 +90,7 @@ export default class CanvasDraw extends PureComponent {
     mouseZoomFactor: 0.01,
     zoomExtents: { min: 0.33, max: 3 },
     clampLinesToDocument: false,
+    animationDuration: 500,
   };
 
   ///// public API /////////////////////////////////////////////////////////////
@@ -492,7 +493,11 @@ export default class CanvasDraw extends PureComponent {
     // Simulate live-drawing of the loaded lines
     // TODO use a generator
     let curTime = 0;
-    let timeoutGap = immediate ? 0 : this.props.loadTimeOffset;
+    let totalPoints = 0;
+    for (const line of lines) {
+      totalPoints += line.points.length
+    }
+    let timeoutGap = immediate ? 0 : this.props.animationDuration/totalPoints;
 
     lines.forEach((line) => {
       const { points, brushColor, brushRadius } = line;
