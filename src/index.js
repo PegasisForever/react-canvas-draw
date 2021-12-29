@@ -1,14 +1,14 @@
-import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
-import { LazyBrush } from "lazy-brush";
-import { Catenary } from "catenary-curve";
+import React, {PureComponent} from 'react'
+import PropTypes from 'prop-types'
+import {LazyBrush} from 'lazy-brush'
+import {Catenary} from 'catenary-curve'
 
-import ResizeObserver from "resize-observer-polyfill";
+import ResizeObserver from 'resize-observer-polyfill'
 
-import CoordinateSystem, { IDENTITY } from "./coordinateSystem";
-import drawImage from "./drawImage";
-import { DefaultState } from "./interactionStateMachine";
-import makePassiveEventOption from "./makePassiveEventOption";
+import CoordinateSystem, {IDENTITY} from './coordinateSystem'
+import drawImage from './drawImage'
+import {DefaultState} from './interactionStateMachine'
+import makePassiveEventOption from './makePassiveEventOption'
 
 function midPointBtw(p1, p2) {
   return {
@@ -97,6 +97,7 @@ export default class CanvasDraw extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.previousSize = undefined
     this.canvas = {};
     this.ctx = {};
 
@@ -152,13 +153,13 @@ export default class CanvasDraw extends PureComponent {
     return this.coordSystem.setView(view);
   };
 
-  getSaveData = () => {
+  getSaveData = (w, h) => {
     // Construct and return the stringified saveData object
     return JSON.stringify({
       lines: this.lines,
-      width: this.props.canvasWidth,
-      height: this.props.canvasHeight,
-    });
+      width: w ? w : this.props.canvasWidth,
+      height: h ? h : this.props.canvasHeight,
+    })
   };
 
   /**
@@ -230,6 +231,7 @@ export default class CanvasDraw extends PureComponent {
     }
 
     const { lines, width, height } = JSON.parse(saveData);
+    console.log(lines)
 
     if (!lines || typeof lines.push !== "function") {
       throw new Error("saveData.lines needs to be an array!");
@@ -241,6 +243,7 @@ export default class CanvasDraw extends PureComponent {
       width === this.props.canvasWidth &&
       height === this.props.canvasHeight
     ) {
+      console.log('same', width)
       this.simulateDrawingLines({
         lines,
         immediate,
@@ -258,7 +261,7 @@ export default class CanvasDraw extends PureComponent {
             x: p.x * scaleX,
             y: p.y * scaleY,
           })),
-          brushRadius: line.brushRadius * scaleAvg,
+          brushRadius: line.brushRadius,
         })),
         immediate,
       });
@@ -446,11 +449,12 @@ export default class CanvasDraw extends PureComponent {
   };
 
   handleCanvasResize = (entries) => {
-    const saveData = this.getSaveData();
+    const saveData = this.previousSize ? this.getSaveData(this.previousSize.width,this.previousSize.height) : this.getSaveData();
     this.deferRedrawOnViewChange = true;
     try {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
+        this.previousSize = {width, height}
         this.setCanvasSize(this.canvas.interface, width, height);
         this.setCanvasSize(this.canvas.drawing, width, height);
         this.setCanvasSize(this.canvas.temp, width, height);
